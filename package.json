@@ -1,11 +1,12 @@
 {
   "name": "@studiometa/cli-test-redirection",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "publishConfig": {
     "access": "public"
   },
   "bin": {
-    "@studiometa/cli-redirection-test": "bin/test-redirection.js",
+    "@studiometa/cli-test-redirection": "bin/test-redirection.js",
+    "cli-test-redirection": "bin/test-redirection.js",
     "test-redirection": "bin/test-redirection.js"
   },
   "main": "src/index.js",
