@@ -1,0 +1,10 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"lib": ["ESNext"]
+	},
+	"include": [
+		"./bin/*.js",
+		"./src/**/*.js"
+	]
+}

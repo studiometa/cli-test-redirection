@@ -1,0 +1,29 @@
+{
+  "name": "@studiometa/cli-test-redirection",
+  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "@studiometa/cli-redirection-test": "bin/test-redirection.js",
+    "test-redirection": "bin/test-redirection.js"
+  },
+  "main": "src/index.js",
+  "type": "commonjs",
+  "files": [
+    "bin/*",
+    "src/*",
+    "README.md"
+  ],
+  "dependencies": {
+    "cac": "^6.7.3",
+    "chalk": "^4.1.1",
+    "jest-diff": "^26.6.2"
+  },
+  "scripts": {
+    "test": "node bin/test-redirection.js"
+  },
+  "devDependencies": {
+    "@types/node": "^15.0.2"
+  }
+}
