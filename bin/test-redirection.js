@@ -21,11 +21,11 @@ const cli = cac(PKG_NAME);
 cli
 	.command('<configPath>', 'Test redirections.')
 	.option(
-		'--concurrency [concurrency]',
+		'-c, --concurrency [concurrency]',
 		'Limit the number of tests run simultaneously.',
 		{ default: 10 }
 	)
-	.option('--delay [delay]', 'Define a delay between each tests.', {
+	.option('-d, --delay [delay]', 'Define a delay between each tests.', {
 		default: 100,
 	})
 	.action((configPath, options) => {
