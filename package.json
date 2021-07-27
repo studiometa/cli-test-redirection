@@ -10,15 +10,19 @@
     "test-redirection": "bin/test-redirection.js"
   },
   "main": "src/index.js",
-  "type": "commonjs",
+  "type": "module",
   "files": [
     "bin/*",
     "src/*",
     "README.md"
   ],
+  "engines": {
+    "node": ">=12"
+  },
   "dependencies": {
     "cac": "^6.7.3",
     "chalk": "^4.1.1",
+    "fastq": "^1.11.1",
     "jest-diff": "^26.6.2"
   },
   "scripts": {
