@@ -28,6 +28,7 @@ cli
 	.option('-d, --delay [delay]', 'Define a delay between each tests.', {
 		default: 100,
 	})
+	.option('--ignore-query-parameters', 'Ignore query parameters in the final URL.')
 	.action((configPath, options) => {
 		const resolvedConfigPath = resolve(process.cwd(), configPath);
 

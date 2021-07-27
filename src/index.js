@@ -7,6 +7,7 @@ import { wait } from './utils.js';
 const OPTIONS = {
 	concurrency: 10,
 	delay: 100,
+	ignoreQueryParameters: false,
 };
 
 const DIFF_OPTIONS = {
@@ -38,8 +39,12 @@ async function getFinalRedirect(url, method = 'GET') {
 
 /**
  * @typedef {Object} RedirectionConfig
- * @property {string} from The origin URL.
- * @property {string} to The target URL.
+ * @property {string} from
+ *   The origin URL.
+ * @property {string} to
+ *   The target URL.
+ * @property {boolean} ignoreQueryParameters
+ *   Whether to ignore the query parameters in the final URL when comparing it with the target URL.
  */
 
 /**
@@ -65,7 +70,13 @@ async function getFinalRedirect(url, method = 'GET') {
 async function redirectionTest(options) {
 	const { from, to } = options;
 	return new Promise(async (resolve, reject) => {
-		const out = await getFinalRedirect(from);
+		let out = await getFinalRedirect(from);
+
+		if (OPTIONS.ignoreQueryParameters || options.ignoreQueryParameters) {
+			const parsedUrl = new URL(out);
+			parsedUrl.search = '';
+			out = parsedUrl.toString();
+		}
 
 		const delayingFn = typeof OPTIONS.delay === 'number' ? wait : () => {};
 
@@ -113,10 +124,10 @@ export default function run(config, options = {}) {
 
 		if (totalRejected > 0) {
 			if (totalRejected !== total) {
-				console.log(chalk.green`${total - totalRejected} test passed.`);
+				console.log(chalk.green`🟢 ${total - totalRejected} out of ${total} test passed.`);
 			}
 
-			console.log(chalk.red`❌ ${totalRejected} out of ${total} tests failed:`);
+			console.log(chalk.red`🔴 ${totalRejected} out of ${total} tests failed:`);
 			console.log('');
 			rejected.forEach(({ reason }) => {
 				console.log(reason.msg, '\n');
@@ -124,7 +135,7 @@ export default function run(config, options = {}) {
 			});
 			process.exit(1);
 		} else {
-			console.log(chalk.green`🎉 All ${total} redirection tests passed!`);
+			console.log(chalk.green`🟢 All ${total} redirection tests passed.`);
 		}
 	});
 }
