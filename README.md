@@ -17,7 +17,8 @@ Your `config.json` file sould contain an array of objects with both `from` and `
   {
     "from": "http://fqdn.com",
     "to": "https://www.fqdn.com",
-    "ignoreQueryParameters": false
+    "ignoreQueryParameters": false,
+    "method": "GET"
   }
 ]
 ```

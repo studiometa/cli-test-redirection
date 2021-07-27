@@ -70,7 +70,7 @@ async function getFinalRedirect(url, method = 'GET') {
 async function redirectionTest(options) {
 	const { from, to } = options;
 	return new Promise(async (resolve, reject) => {
-		let out = await getFinalRedirect(from);
+		let out = await getFinalRedirect(from, options.method);
 
 		if (OPTIONS.ignoreQueryParameters || options.ignoreQueryParameters) {
 			const parsedUrl = new URL(out);
