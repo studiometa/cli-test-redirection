@@ -22,9 +22,19 @@ Your `config.json` file sould contain an array of objects with both `from` and `
   }
 ]
 ```
+
 The `ignoreQueryParameters` property allow to ignore query parameters in the final URL before comparing it with the `to` URL as some redirection directives will keep them.
 
-## Options
+When working with simple "from → to" redirections, you can use a CSV file. The first column should be the "from" URL, the second the "to" URL. You can then use the `--parser csv` paramete:
+
+```sh
+npx @studiometa/cli-test-redirection path/to/redirects.csv --parser csv
+
+# With a custom delimiter
+npx @studiometa/cli-test-redirection path/to/redirects.csv --parser csv --csv-delimiter ';'
+```
+
+## Parameters
 
 ### `--concurrecy [number]`
 
@@ -57,4 +67,50 @@ Ignore query parameters when comparing the final URL with the target URL defined
 ```bash
 test-redirection --ignore-query-parameters path/to/config.json
 ```
+### `--parser [json|csv]`
 
+Define how the input file should be parsed.
+
+```bash
+test-redirection path/to/file.csv --parser csv
+```
+
+### `--replace-host`
+
+Replace the host from the values in the configuration file to easily test against different environment.
+
+```bash
+test-redirection path/to/config.json --replace-host preprod.fqdn.com
+```
+
+### `-v, --verbose`
+
+Display verbose output.
+
+```bash
+test-redirection path/to/config.json -v
+```
+
+### `--only-errors`
+
+When in verbose mode, will only print errors to the console. Useful when you have hundreds of redirections with only a few one failing.
+
+```bash
+test-redirection path/to/config.json -v --only-errors
+```
+
+### `--user`
+
+Define basic auth user. Must be used with the `--password` parameter.
+
+```bash
+test-redirection path/to/config.json --user user --password pass
+```
+
+### `--password`
+
+Define basic auth password. Must be used with the `--user` parameter.
+
+```bash
+test-redirection path/to/config.json --password pass --user user
+```
