@@ -137,9 +137,9 @@ async function redirectionTest({ options, total }) {
 		const delayingFn = typeof OPTIONS.delay === 'number' ? wait : () => {};
 
 		current++;
-		const count = chalk.grey`[${current
+		let count = chalk.gray(`[${current
 			.toString()
-			.padStart(total.toString().length)}/${total}]`;
+			.padStart(total.toString().length)}/${total}]`);
 
 		if (typeof out !== 'string') {
 			const msg = `🔁 ${chalk.white(from)} → ${chalk.magenta(
@@ -219,11 +219,11 @@ export default function run(config, options = {}) {
 		if (totalRejected > 0) {
 			if (totalRejected !== total) {
 				console.log(
-					chalk.green`🟢 ${total - totalRejected} out of ${total} test passed.`
+					chalk.green(`🟢 ${total - totalRejected} out of ${total} test passed.`)
 				);
 			}
 
-			console.log(chalk.red`🔴 ${totalRejected} out of ${total} tests failed.`);
+			console.log(chalk.red(`🔴 ${totalRejected} out of ${total} tests failed.`));
 			console.log('');
 
 			// rejected.forEach(({ reason }) => {
@@ -243,7 +243,10 @@ export default function run(config, options = {}) {
 
 			process.exit(1);
 		} else {
-			logUpdate(chalk.green`🟢 All ${total} redirection tests passed.`);
+			if (OPTIONS.verbose) {
+				console.log('');
+			}
+			logUpdate(chalk.green(`🟢 All ${total} redirection tests passed.`));
 			process.exit();
 		}
 	});
