@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import { readFileSync } from 'fs';
 
 /**
@@ -28,14 +29,46 @@ export function importJson(path, base) {
  * @param {{ delimiter?: string|RegExp }} [options]
  * @returns {Array<{ from: string, to: string }>}
  */
-export function csvToJson(csv, { delimiter = ' ' } = {}) {
-  return csv.split('\n').filter(Boolean).map((line) => {
-    const [from, to] = line.split(delimiter);
-    return {
-      from: from ?? '',
-      to: to ?? '',
-    };
-  });
+export function csvToJson(csv, { delimiter = ' ', file = '' } = {}) {
+  const errors = [];
+  const data = csv
+    .split('\n')
+    .filter(Boolean)
+    .map((line, index) => {
+      const [from, to] = line.split(delimiter);
+
+      if (!to) {
+        errors.push(
+          [
+            chalk.red`❌ Failed parsing the \`to\` column from CSV file while reading line:`,
+            `  ${line}`,
+            chalk.grey`  in ${file}:${index + 1}\n`,
+          ].join('\n')
+        );
+      }
+
+      if (!from) {
+        errors.push(
+          [
+            chalk.red`❌ Failed parsing the \`from\` column from CSV file while reading line:`,
+            `  ${line}`,
+            chalk.grey`  in ${file}:${index + 1}\n`,
+          ].join('\n')
+        );
+      }
+
+      return {
+        from,
+        to,
+      };
+    });
+
+  if (errors.length) {
+    errors.forEach((error) => console.log(error));
+    process.exit(1);
+  }
+
+  return data;
 }
 
 /**
@@ -46,7 +79,7 @@ export function csvToJson(csv, { delimiter = ' ' } = {}) {
  * @returns {Array<{ from: string, to: string }>}
  */
 export function importCsv(path, base, options) {
-  return csvToJson(importFile(path, base), options);
+  return csvToJson(importFile(path, base), { ...options, file: path });
 }
 
 /**

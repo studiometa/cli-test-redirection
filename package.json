@@ -23,7 +23,8 @@
     "cac": "^6.7.3",
     "chalk": "^4.1.1",
     "fastq": "^1.11.1",
-    "jest-diff": "^26.6.2"
+    "jest-diff": "^26.6.2",
+    "log-update": "^5.0.0"
   },
   "scripts": {
     "test": "node bin/test-redirection.js"
