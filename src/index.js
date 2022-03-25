@@ -2,19 +2,25 @@ import { exec } from 'child_process';
 import chalk from 'chalk';
 import { diffStringsUnified } from 'jest-diff';
 import fastq from 'fastq';
+import logUpdate from 'log-update';
 import { wait } from './utils.js';
 
 const OPTIONS = {
 	concurrency: 10,
 	delay: 100,
 	ignoreQueryParameters: false,
+	replaceHost: '',
+	verbose: false,
+	onlyErrors: false,
+	user: '',
+	password: '',
 };
 
 const DIFF_OPTIONS = {
 	expand: false,
 	omitAnnotationLines: true,
-	aIndicator: '\t-',
-	bIndicator: '\t+',
+	aIndicator: '\tExpected:',
+	bIndicator: '\tReceived:',
 };
 
 /**
@@ -25,12 +31,28 @@ const DIFF_OPTIONS = {
  * @return {Promise<string>} The final URL after all redirection have taken place
  */
 async function getFinalRedirect(url, method = 'GET') {
-	return new Promise((resolve) => {
-		const cmd = `curl -o /dev/null -sL -k -w "%{url_effective}" -X ${method} -I "${url}"`;
+	return new Promise((resolve, reject) => {
+		let cmd = `curl -o /dev/null -sL -k -w "%{url_effective}" -X ${method} -I "${url}"`;
+
+		if (OPTIONS.user && OPTIONS.password) {
+			cmd += ` --user ${OPTIONS.user}:${OPTIONS.password}`;
+		}
+
 		exec(cmd, (error, out) => {
 			if (error) {
-				console.log(chalk.red(error.message));
-				process.exit(1);
+				if (OPTIONS.verbose) {
+					console.log(
+						chalk.red(
+							'An error occured while doing a request. This might be caused by an infinite redirection loop.'
+						)
+					);
+					console.log(
+						chalk.red('Try running the following command to confirm this:\n')
+					);
+					console.log(chalk.red(`\tcurl -sIL -X ${method} "${url}"\n`));
+					console.log(chalk.red(error.message));
+				}
+				reject({ error, url, method, cmd, out });
 			}
 			resolve(out);
 		});
@@ -62,15 +84,49 @@ async function getFinalRedirect(url, method = 'GET') {
  * @property {string} [diff] The diff if the test has failed.
  */
 
+
+function print(msg, type = 'success') {
+	logUpdate(msg);
+	if (type === 'error') {
+		logUpdate.done();
+	}
+}
+
+function printSuccess(msg) {
+	print(msg, 'success');
+}
+
+function printError(msg) {
+	print(msg, 'error');
+}
+
+let current = 0;
+
 /**
  * Test a redirection.
  * @param {RedirectionConfig} options
  * @return {Promise<RedirectionResult>}
  */
-async function redirectionTest(options) {
-	const { from, to } = options;
+async function redirectionTest({ options, total }) {
+	let { from, to } = options;
+
+	if (OPTIONS.replaceHost) {
+		from = new URL(from);
+		from.host = OPTIONS.replaceHost;
+		from = from.toString();
+		to = new URL(to);
+		to.host = OPTIONS.replaceHost;
+		to = to.toString();
+	}
+
 	return new Promise(async (resolve, reject) => {
-		let out = await getFinalRedirect(from, options.method);
+		let out;
+
+		try {
+			out = await getFinalRedirect(from, options.method);
+		} catch (error) {
+			out = error;
+		}
 
 		if (OPTIONS.ignoreQueryParameters || options.ignoreQueryParameters) {
 			const parsedUrl = new URL(out);
@@ -80,12 +136,37 @@ async function redirectionTest(options) {
 
 		const delayingFn = typeof OPTIONS.delay === 'number' ? wait : () => {};
 
-		if (out !== to) {
+		current++;
+		let count = chalk.gray(`[${current
+			.toString()
+			.padStart(total.toString().length)}/${total}]`);
+
+		if (typeof out !== 'string') {
+			const msg = `🔁 ${chalk.white(from)} → ${chalk.magenta(
+				to
+			)} → ${chalk.magentaBright(out.out)} (potential infinite loop)`
+
+
+			if (!OPTIONS.verbose) {
+  			printError(count + ' ' + msg);
+			} else {
+  			console.log(count, msg)
+			}
+
+			await delayingFn(OPTIONS.delay);
+			reject({ msg, from, to, out });
+
+		} else if (out !== to) {
 			const msg = `🚫 ${chalk.white(from)} → ${chalk.red.strikethrough(
 				to
 			)} → ${chalk.magentaBright(out)}`;
 			const diff = diffStringsUnified(to, out, DIFF_OPTIONS);
-			console.log(msg);
+
+			if (!OPTIONS.verbose) {
+  			printError(count + ' ' + msg);  // write text
+			} else {
+  			console.log(count, msg)
+			}
 
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out, diff });
@@ -93,7 +174,16 @@ async function redirectionTest(options) {
 			const msg = `✅ ${chalk.white(from)} ${chalk.black('→')} ${chalk.blue(
 				to
 			)}`;
-			console.log(msg);
+
+
+			if (!OPTIONS.verbose) {
+  			printSuccess(count + ' ' + msg);
+			} else {
+				if (!OPTIONS.onlyErrors) {
+					console.log(count, msg);
+				}
+			}
+
 			await delayingFn(OPTIONS.delay);
 			resolve({ msg, from, to, out });
 		}
@@ -112,30 +202,52 @@ export default function run(config, options = {}) {
 		OPTIONS[name] = value;
 	});
 
+	current = 0;
+
 	const queue = fastq.promise(redirectionTest, OPTIONS.concurrency);
-	const runners = config.map((options) => queue.push(options));
+	const runners = config.map((c, index) =>
+		queue.push({ options: c, index, total: config.length })
+	);
 
 	const total = runners.length;
 	Promise.allSettled(runners).then((results) => {
 		const rejected = results.filter((r) => r.status === 'rejected');
 		const totalRejected = rejected.length;
 
-		console.log('');
+		logUpdate('');
 
 		if (totalRejected > 0) {
 			if (totalRejected !== total) {
-				console.log(chalk.green`🟢 ${total - totalRejected} out of ${total} test passed.`);
+				console.log(
+					chalk.green(`🟢 ${total - totalRejected} out of ${total} test passed.`)
+				);
 			}
 
-			console.log(chalk.red`🔴 ${totalRejected} out of ${total} tests failed:`);
+			console.log(chalk.red(`🔴 ${totalRejected} out of ${total} tests failed.`));
 			console.log('');
-			rejected.forEach(({ reason }) => {
-				console.log(reason.msg, '\n');
-				console.log(reason.diff, '\n');
-			});
+
+			// rejected.forEach(({ reason }) => {
+			// 	console.log(reason.msg, '\n');
+			// 	console.log(reason.diff, '\n');
+			// });
+			// console.log('');
+
+			// if (totalRejected !== total) {
+			// 	console.log(
+			// 		chalk.green`🟢 ${total - totalRejected} out of ${total} test passed.`
+			// 	);
+			// }
+
+			// console.log(chalk.red`🔴 ${totalRejected} out of ${total} tests failed:`);
+			// console.log('');
+
 			process.exit(1);
 		} else {
-			console.log(chalk.green`🟢 All ${total} redirection tests passed.`);
+			if (OPTIONS.verbose) {
+				console.log('');
+			}
+			logUpdate(chalk.green(`🟢 All ${total} redirection tests passed.`));
+			process.exit();
 		}
 	});
 }

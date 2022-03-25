@@ -2,7 +2,7 @@
 	"compilerOptions": {
 		"target": "ESNext",
 		"lib": ["ESNext"],
-		"module": "System"
+		"module": "Node12"
 	},
 	"include": [
 		"./bin/*.js",

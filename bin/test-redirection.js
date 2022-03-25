@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import chalk from 'chalk';
 import { cac } from 'cac';
 import run from '../src/index.js';
-import { importJson } from '../src/utils.js';
+import { importJson, importCsv } from '../src/utils.js';
 
 const pkg = importJson('../package.json', import.meta.url);
 const PKG_NAME = pkg.name;
@@ -29,6 +29,13 @@ cli
 		default: 100,
 	})
 	.option('--ignore-query-parameters', 'Ignore query parameters in the final URL.')
+	.option('-p, --parser [parser]', 'Define which parser should be used: json or csv.', { default: 'json' })
+	.option('--csv-delimiter [delimiter]', 'Define the delimiter of the input CSV file, can be a string or a RegExp.', { default: ',' })
+	.option('--replace-host <host>', 'Replace host for both the `from` and `to` parameters.')
+	.option('-v, --verbose', 'Log all redirections.')
+	.option('--only-errors', 'Log only errors.')
+	.option('--user <user>', 'Basic auth user.')
+	.option('--password <password>', 'Basic auth password.')
 	.action((configPath, options) => {
 		const resolvedConfigPath = resolve(process.cwd(), configPath);
 
@@ -39,7 +46,16 @@ cli
 			process.exit(1);
 		}
 
-		const config = importJson(resolvedConfigPath, import.meta.url);
+		let config;
+
+		if (options.parser === 'csv') {
+			config = importCsv(resolvedConfigPath, import.meta.url, {
+				delimiter: new RegExp(options.csvDelimiter)
+			});
+		} else {
+			config = importJson(resolvedConfigPath, import.meta.url);
+		}
+
 		run(config, options);
 	});
 

@@ -1,4 +1,15 @@
+import chalk from 'chalk';
 import { readFileSync } from 'fs';
+
+/**
+ * Import a file.
+ * @param {string} path The path to the file.
+ * @param {string} base The base path from which the import should be resolved.
+ * @returns {string}
+ */
+export function importFile(path, base) {
+  return readFileSync(new URL(path, base)).toString();
+}
 
 /**
  * Import a JSON file.
@@ -8,7 +19,67 @@ import { readFileSync } from 'fs';
  * @return {Object}
  */
 export function importJson(path, base) {
-	return JSON.parse(readFileSync(new URL(path, base)).toString());
+  return JSON.parse(importFile(path, base));
+}
+
+/**
+ * Parse a CSV file.
+ * @param {string} csv
+ * @returns {Array<any>}
+ * @param {{ delimiter?: string|RegExp }} [options]
+ * @returns {Array<{ from: string, to: string }>}
+ */
+export function csvToJson(csv, { delimiter = ' ', file = '' } = {}) {
+  const errors = [];
+  const data = csv
+    .split('\n')
+    .filter(Boolean)
+    .map((line, index) => {
+      const [from, to] = line.split(delimiter);
+
+      if (!to) {
+        errors.push(
+          [
+            chalk.red`❌ Failed parsing the \`to\` column from CSV file while reading line:`,
+            `  ${line}`,
+            chalk.grey`  in ${file}:${index + 1}\n`,
+          ].join('\n')
+        );
+      }
+
+      if (!from) {
+        errors.push(
+          [
+            chalk.red`❌ Failed parsing the \`from\` column from CSV file while reading line:`,
+            `  ${line}`,
+            chalk.grey`  in ${file}:${index + 1}\n`,
+          ].join('\n')
+        );
+      }
+
+      return {
+        from,
+        to,
+      };
+    });
+
+  if (errors.length) {
+    errors.forEach((error) => console.log(error));
+    process.exit(1);
+  }
+
+  return data;
+}
+
+/**
+ * Import a CSV file as a config object.
+ * @param {string} path
+ * @param {string} base
+ * @param {{ delimiter?: string|RegExp }} [options]
+ * @returns {Array<{ from: string, to: string }>}
+ */
+export function importCsv(path, base, options) {
+  return csvToJson(importFile(path, base), { ...options, file: path });
 }
 
 /**
@@ -18,7 +89,7 @@ export function importJson(path, base) {
  * @return {Promise<number>}
  */
 export async function wait(delay = 0) {
-	return new Promise((resolve) => {
-		setTimeout(() => resolve(delay), delay);
-	});
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(delay), delay);
+  });
 }
