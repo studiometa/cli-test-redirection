@@ -30,6 +30,9 @@ async function getFinalRedirect(url, method = 'GET') {
 		const cmd = `curl -o /dev/null -sL -k -w "%{url_effective}" -X ${method} -I "${url}"`;
 		exec(cmd, (error, out) => {
 			if (error) {
+				console.log(chalk.red('An error occured while doing a request. This might be caused by an infinite redirection loop.'));
+				console.log(chalk.red('Try running the following command to confirm this:\n'));
+				console.log(chalk.red(`\tcurl -sIL -X ${method} "${url}"\n`));
 				console.log(chalk.red(error.message));
 				process.exit(1);
 			}
