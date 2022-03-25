@@ -29,11 +29,13 @@ cli
 		default: 100,
 	})
 	.option('--ignore-query-parameters', 'Ignore query parameters in the final URL.')
-	.option('-p, --parser [parser]', 'Define which parser should be used: json or csv.')
-	.option('--csv-delimiter [delimiter]', 'Define the delimiter of the input CSV file, can be a string or a RegExp.')
-	.option('--replace-host [host]', 'Replace host for both the `from` and `to` parameters.')
+	.option('-p, --parser [parser]', 'Define which parser should be used: json or csv.', { default: 'json' })
+	.option('--csv-delimiter [delimiter]', 'Define the delimiter of the input CSV file, can be a string or a RegExp.', { default: ',' })
+	.option('--replace-host <host>', 'Replace host for both the `from` and `to` parameters.')
 	.option('-v, --verbose', 'Log all redirections.')
 	.option('--only-errors', 'Log only errors.')
+	.option('--user <user>', 'Basic auth user.')
+	.option('--password <password>', 'Basic auth password.')
 	.action((configPath, options) => {
 		const resolvedConfigPath = resolve(process.cwd(), configPath);
 
