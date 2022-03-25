@@ -31,6 +31,7 @@ cli
 	.option('--ignore-query-parameters', 'Ignore query parameters in the final URL.')
 	.option('-p, --parser [parser]', 'Define which parser should be used: json or csv.')
 	.option('--csv-delimiter [delimiter]', 'Define the delimiter of the input CSV file, can be a string or a RegExp.')
+	.option('--replace-host [host]', 'Replace host for both the `from` and `to` parameters.')
 	.action((configPath, options) => {
 		const resolvedConfigPath = resolve(process.cwd(), configPath);
 

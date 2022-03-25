@@ -8,6 +8,7 @@ const OPTIONS = {
 	concurrency: 10,
 	delay: 100,
 	ignoreQueryParameters: false,
+	replaceHost: '',
 };
 
 const DIFF_OPTIONS = {
@@ -68,7 +69,17 @@ async function getFinalRedirect(url, method = 'GET') {
  * @return {Promise<RedirectionResult>}
  */
 async function redirectionTest(options) {
-	const { from, to } = options;
+	let { from, to } = options;
+
+	if (OPTIONS.replaceHost) {
+		from = new URL(from);
+		from.host = OPTIONS.replaceHost;
+		from = from.toString();
+		to = new URL(to);
+		to.host = OPTIONS.replaceHost;
+		to = to.toString();
+	}
+
 	return new Promise(async (resolve, reject) => {
 		let out = await getFinalRedirect(from, options.method);
 
