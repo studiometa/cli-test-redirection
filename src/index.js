@@ -127,7 +127,7 @@ export default function run(config, options = {}) {
 	});
 
 	const queue = fastq.promise(redirectionTest, OPTIONS.concurrency);
-	const runners = config.map((options) => queue.push(options));
+	const runners = config.map((c) => queue.push(c));
 
 	const total = runners.length;
 	Promise.allSettled(runners).then((results) => {
@@ -138,7 +138,9 @@ export default function run(config, options = {}) {
 
 		if (totalRejected > 0) {
 			if (totalRejected !== total) {
-				console.log(chalk.green`🟢 ${total - totalRejected} out of ${total} test passed.`);
+				console.log(
+					chalk.green`🟢 ${total - totalRejected} out of ${total} test passed.`
+				);
 			}
 
 			console.log(chalk.red`🔴 ${totalRejected} out of ${total} tests failed:`);
@@ -147,6 +149,17 @@ export default function run(config, options = {}) {
 				console.log(reason.msg, '\n');
 				console.log(reason.diff, '\n');
 			});
+			console.log('');
+
+			if (totalRejected !== total) {
+				console.log(
+					chalk.green`🟢 ${total - totalRejected} out of ${total} test passed.`
+				);
+			}
+
+			console.log(chalk.red`🔴 ${totalRejected} out of ${total} tests failed:`);
+			console.log('');
+
 			process.exit(1);
 		} else {
 			console.log(chalk.green`🟢 All ${total} redirection tests passed.`);
