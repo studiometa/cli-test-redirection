@@ -148,9 +148,9 @@ async function redirectionTest({ options, total }) {
 		);
 
 		if (typeof out !== 'string') {
-			const msg = `🔁 ${chalk.white(from)} → ${chalk.magenta(
+			const msg = `🔁 ${chalk.white(from)} \n  → ${chalk.magenta(
 				to
-			)} → ${chalk.magentaBright(out.out)} (potential infinite loop)`;
+			)} \n  → ${chalk.magentaBright(out.out)} (potential infinite loop)`;
 
 			if (!OPTIONS.verbose) {
 				printError(count + ' ' + msg);
@@ -161,9 +161,9 @@ async function redirectionTest({ options, total }) {
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out });
 		} else if (out !== to) {
-			const msg = `🚫 ${chalk.white(from)} → ${chalk.red.strikethrough(
+			const msg = `🚫 ${chalk.white(from)} \n  → ${chalk.red.strikethrough(
 				to
-			)} → ${chalk.magentaBright(out)}`;
+			)} \n  → ${chalk.magentaBright(out)}`;
 			const diff = diffStringsUnified(to, out, DIFF_OPTIONS);
 
 			if (!OPTIONS.verbose) {
@@ -175,7 +175,7 @@ async function redirectionTest({ options, total }) {
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out, diff });
 		} else {
-			const msg = `✅ ${chalk.white(from)} ${chalk.black('→')} ${chalk.blue(
+			const msg = `✅ ${chalk.white(from)} \n  ${chalk.black('→')} ${chalk.blue(
 				to
 			)}`;
 
