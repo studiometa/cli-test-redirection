@@ -7,19 +7,19 @@ import { readFileSync } from 'fs';
  * @param {string} base The base path from which the import should be resolved.
  * @returns {string}
  */
-export function importFile(path, base) {
-  return readFileSync(new URL(path, base)).toString();
+export function importFile(path) {
+  const file = readFileSync(new URL(path, 'file://')).toString();
+  return file;
 }
 
 /**
  * Import a JSON file.
  *
  * @param {string} path The path to the JSON file.
- * @param {string} base The base path from which the import should be resolved.
  * @return {Object}
  */
-export function importJson(path, base) {
-  return JSON.parse(importFile(path, base));
+export function importJson(path) {
+  return JSON.parse(importFile(path));
 }
 
 /**
@@ -74,12 +74,11 @@ export function csvToJson(csv, { delimiter = ' ', file = '' } = {}) {
 /**
  * Import a CSV file as a config object.
  * @param {string} path
- * @param {string} base
  * @param {{ delimiter?: string|RegExp }} [options]
  * @returns {Array<{ from: string, to: string }>}
  */
-export function importCsv(path, base, options) {
-  return csvToJson(importFile(path, base), { ...options, file: path });
+export function importCsv(path, options) {
+  return csvToJson(importFile(path), { ...options, file: path });
 }
 
 /**

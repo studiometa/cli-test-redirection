@@ -52,11 +52,11 @@ cli
 		let config;
 
 		if (options.parser === 'csv') {
-			config = importCsv(resolvedConfigPath, import.meta.url, {
+			config = importCsv(resolvedConfigPath, {
 				delimiter: new RegExp(options.csvDelimiter)
 			});
 		} else {
-			config = importJson(resolvedConfigPath, import.meta.url);
+			config = importJson(resolvedConfigPath);
 		}
 
 		run(config, options);
