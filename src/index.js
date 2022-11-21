@@ -56,7 +56,7 @@ async function getFinalRedirect(url, method = 'GET') {
 				}
 				reject({ error, url, method, cmd, out });
 			}
-			resolve(out);
+			resolve(decodeURI(out));
 		});
 	});
 }
