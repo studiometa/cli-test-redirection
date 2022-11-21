@@ -28,9 +28,10 @@
   },
   "scripts": {
     "test": "node bin/test-redirection.js",
-    "build": "npm run build:esbuild && npm run build:pkg && npm run build:clean",
+    "build": "npm run build:esbuild && npm run build:clear && npm run build:pkg && npm run build:clean",
     "build:esbuild": "esbuild bin/test-redirection.js --bundle --platform=node --outfile=.temp/bundle.cjs",
-    "build:pkg": "pkg ./.temp/bundle.cjs --outpath=./build -t latest-alpine,latest-macos",
+    "build:clear": "rm -rf build",
+    "build:pkg": "pkg ./.temp/bundle.cjs --out-path=./build -t latest-alpine,latest-macos --compress Brotli",
     "build:clean": "rm .temp/bundle.cjs"
   },
   "devDependencies": {
