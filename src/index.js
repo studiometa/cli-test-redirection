@@ -125,6 +125,10 @@ async function redirectionTest({ options, total }) {
 		}
 	}
 
+	if (from.includes('/.*')) {
+		from = from.replace('/.*', '/__CLI_TEST_REDIRECTION__');
+	}
+
 	return new Promise(async (resolve, reject) => {
 		let out;
 

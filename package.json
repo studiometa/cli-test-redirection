@@ -27,9 +27,15 @@
     "log-update": "^5.0.0"
   },
   "scripts": {
-    "test": "node bin/test-redirection.js"
+    "test": "node bin/test-redirection.js",
+    "build": "npm run build:esbuild && npm run build:pkg && npm run build:clean",
+    "build:esbuild": "esbuild bin/test-redirection.js --bundle --platform=node --outfile=.temp/bundle.cjs",
+    "build:pkg": "pkg ./.temp/bundle.cjs --outpath=./build -t latest-alpine,latest-macos",
+    "build:clean": "rm .temp/bundle.cjs"
   },
   "devDependencies": {
-    "@types/node": "^17.0.23"
+    "@types/node": "^17.0.23",
+    "esbuild": "^0.15.15",
+    "pkg": "^5.8.0"
   }
 }

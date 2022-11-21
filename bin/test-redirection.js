@@ -5,8 +5,9 @@ import chalk from 'chalk';
 import { cac } from 'cac';
 import run from '../src/index.js';
 import { importJson, importCsv } from '../src/utils.js';
+import pkg from '../package.json';
 
-const pkg = importJson('../package.json', import.meta.url);
+// const pkg = importJson('../package.json', import.meta.url);
 const PKG_NAME = pkg.name;
 const PKG_VERSION = pkg.version;
 const CLI_NAME = 'test-redirection';
