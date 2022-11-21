@@ -32,6 +32,8 @@ cli
 	.option('-p, --parser [parser]', 'Define which parser should be used: json or csv.', { default: 'json' })
 	.option('--csv-delimiter [delimiter]', 'Define the delimiter of the input CSV file, can be a string or a RegExp.', { default: ',' })
 	.option('--replace-host <host>', 'Replace host for both the `from` and `to` parameters.')
+	.option('--replace-from-host <host>', 'Replace host for the `from` parameter.')
+	.option('--replace-to-host <host>', 'Replace host for the `to` parameter.')
 	.option('-v, --verbose', 'Log all redirections.')
 	.option('--only-errors', 'Log only errors.')
 	.option('--user <user>', 'Basic auth user.')

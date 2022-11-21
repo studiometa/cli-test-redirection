@@ -10,6 +10,8 @@ const OPTIONS = {
 	delay: 100,
 	ignoreQueryParameters: false,
 	replaceHost: '',
+	replaceFromHost: '',
+	replaceToHost: '',
 	verbose: false,
 	onlyErrors: false,
 	user: '',
@@ -84,7 +86,6 @@ async function getFinalRedirect(url, method = 'GET') {
  * @property {string} [diff] The diff if the test has failed.
  */
 
-
 function print(msg, type = 'success') {
 	logUpdate(msg);
 	if (type === 'error') {
@@ -110,13 +111,18 @@ let current = 0;
 async function redirectionTest({ options, total }) {
 	let { from, to } = options;
 
-	if (OPTIONS.replaceHost) {
-		from = new URL(from);
-		from.host = OPTIONS.replaceHost;
-		from = from.toString();
-		to = new URL(to);
-		to.host = OPTIONS.replaceHost;
-		to = to.toString();
+	if (OPTIONS.replaceHost || OPTIONS.replaceFromHost || OPTIONS.replaceToHost) {
+		if (OPTIONS.replaceHost || OPTIONS.replaceFromHost) {
+			from = new URL(from);
+			from.host = OPTIONS.replaceFromHost || OPTIONS.replaceHost;
+			from = from.toString();
+		}
+
+		if (OPTIONS.replaceHost || OPTIONS.replaceToHost) {
+			to = new URL(to);
+			to.host = OPTIONS.replaceToHost || OPTIONS.replaceHost;
+			to = to.toString();
+		}
 	}
 
 	return new Promise(async (resolve, reject) => {
@@ -137,25 +143,23 @@ async function redirectionTest({ options, total }) {
 		const delayingFn = typeof OPTIONS.delay === 'number' ? wait : () => {};
 
 		current++;
-		let count = chalk.gray(`[${current
-			.toString()
-			.padStart(total.toString().length)}/${total}]`);
+		let count = chalk.gray(
+			`[${current.toString().padStart(total.toString().length)}/${total}]`
+		);
 
 		if (typeof out !== 'string') {
 			const msg = `🔁 ${chalk.white(from)} → ${chalk.magenta(
 				to
-			)} → ${chalk.magentaBright(out.out)} (potential infinite loop)`
-
+			)} → ${chalk.magentaBright(out.out)} (potential infinite loop)`;
 
 			if (!OPTIONS.verbose) {
-  			printError(count + ' ' + msg);
+				printError(count + ' ' + msg);
 			} else {
-  			console.log(count, msg)
+				console.log(count, msg);
 			}
 
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out });
-
 		} else if (out !== to) {
 			const msg = `🚫 ${chalk.white(from)} → ${chalk.red.strikethrough(
 				to
@@ -163,9 +167,9 @@ async function redirectionTest({ options, total }) {
 			const diff = diffStringsUnified(to, out, DIFF_OPTIONS);
 
 			if (!OPTIONS.verbose) {
-  			printError(count + ' ' + msg);  // write text
+				printError(count + ' ' + msg); // write text
 			} else {
-  			console.log(count, msg)
+				console.log(count, msg);
 			}
 
 			await delayingFn(OPTIONS.delay);
@@ -175,9 +179,8 @@ async function redirectionTest({ options, total }) {
 				to
 			)}`;
 
-
 			if (!OPTIONS.verbose) {
-  			printSuccess(count + ' ' + msg);
+				printSuccess(count + ' ' + msg);
 			} else {
 				if (!OPTIONS.onlyErrors) {
 					console.log(count, msg);
@@ -219,11 +222,15 @@ export default function run(config, options = {}) {
 		if (totalRejected > 0) {
 			if (totalRejected !== total) {
 				console.log(
-					chalk.green(`🟢 ${total - totalRejected} out of ${total} test passed.`)
+					chalk.green(
+						`🟢 ${total - totalRejected} out of ${total} test passed.`
+					)
 				);
 			}
 
-			console.log(chalk.red(`🔴 ${totalRejected} out of ${total} tests failed.`));
+			console.log(
+				chalk.red(`🔴 ${totalRejected} out of ${total} tests failed.`)
+			);
 			console.log('');
 
 			// rejected.forEach(({ reason }) => {
