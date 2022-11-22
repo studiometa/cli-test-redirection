@@ -30,7 +30,7 @@ cli
 		default: 100,
 	})
 	.option('--ignore-query-parameters', 'Ignore query parameters in the final URL.')
-	.option('-p, --parser [parser]', 'Define which parser should be used: json or csv.', { default: 'json' })
+	.option('-p, --parser [parser]', 'Define which parser should be used: json or csv.', { default: null })
 	.option('--csv-delimiter [delimiter]', 'Define the delimiter of the input CSV file, can be a string or a RegExp.', { default: ',' })
 	.option('--replace-host <host>', 'Replace host for both the `from` and `to` parameters.')
 	.option('--replace-from-host <host>', 'Replace host for the `from` parameter.')
@@ -51,7 +51,7 @@ cli
 
 		let config;
 
-		if (options.parser === 'csv') {
+		if (options.parser === 'csv' || options.parser === null && resolvedConfigPath.endsWith('.csv')) {
 			config = importCsv(resolvedConfigPath, {
 				delimiter: new RegExp(options.csvDelimiter)
 			});
