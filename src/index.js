@@ -165,9 +165,9 @@ async function redirectionTest({ options, total }) {
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out });
 		} else if (out !== to) {
-			const msg = `🚫 ${chalk.white(from)} \n  → ${chalk.red.strikethrough(
+			const msg = `🚫 ${chalk.white(from)} \n  → ${chalk.red('-')} ${chalk.red.strikethrough(
 				to
-			)} \n  → ${chalk.magentaBright(out)}`;
+			)} \n  → ${chalk.magentaBright(`+ ${out}`)}`;
 			const diff = diffStringsUnified(to, out, DIFF_OPTIONS);
 
 			if (!OPTIONS.verbose) {
