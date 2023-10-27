@@ -5,9 +5,9 @@
     "access": "public"
   },
   "bin": {
-    "@studiometa/cli-test-redirection": "bin/test-redirection.js",
-    "cli-test-redirection": "bin/test-redirection.js",
-    "test-redirection": "bin/test-redirection.js"
+    "@studiometa/cli-test-redirection": "dist/test-redirection.js",
+    "cli-test-redirection": "dist/test-redirection.js",
+    "test-redirection": "dist/test-redirection.js"
   },
   "main": "src/index.js",
   "type": "module",
@@ -28,11 +28,12 @@
   },
   "scripts": {
     "test": "node bin/test-redirection.js",
-    "build": "npm run build:esbuild && npm run build:clear && npm run build:pkg && npm run build:clean",
-    "build:esbuild": "esbuild bin/test-redirection.js --bundle --platform=node --outfile=.temp/bundle.cjs",
-    "build:clear": "rm -rf build",
-    "build:pkg": "pkg ./.temp/bundle.cjs --out-path=./build -t latest-alpine,latest-macos --compress Brotli",
-    "build:clean": "rm .temp/bundle.cjs"
+    "build": "npm run build:clear && npm run build:esbuild && npm run build:pkg",
+    "build:clear": "rm -rf dist",
+    "build:esbuild": "npm run build:esbuild:cjs && npm run build:esbuild:esm",
+    "build:esbuild:cjs": "esbuild bin/test-redirection.js --bundle --platform=node --format=cjs --outfile=dist/test-redirection.cjs",
+    "build:esbuild:esm": "esbuild bin/test-redirection.js --bundle --external:cac --external:chalk --external:fastq --external:jest-diff --external:log-update --platform=node --format=esm --outfile=dist/test-redirection.js",
+    "build:pkg": "pkg ./dist/test-redirection.cjs --out-path=./dist -t latest-alpine --compress Brotli"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",
