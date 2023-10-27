@@ -1,18 +1,10 @@
 # Install Node dependencies
-FROM node:20-alpine AS node_install
+FROM node:current-alpine AS node_install
 
 WORKDIR /app
 COPY package.json .
 COPY package-lock.json .
-RUN npm install
-
-# Build cli tool
-FROM node:20-alpine AS node_builder
-
-WORKDIR /app
-COPY . .
-COPY --from=node_install /app/node_modules /app/node_modules
-RUN npm run build
+RUN npm install --no-dev --no-audit --no-fund
 
 # Build mkcert
 FROM golang:alpine AS mkcert_builder
@@ -29,9 +21,11 @@ RUN mkdir -p /app
 WORKDIR /app
 RUN echo "" > /app/index.html
 
-RUN apk add curl openssl
+RUN apk add curl openssl nodejs-current
 
-COPY --from=node_builder /app/dist/test-redirection /usr/local/bin/test-redirection
+COPY . /var/www/
+COPY --from=node_install /app/node_modules /var/www/node_modules
+RUN ln -s /var/www/bin/test-redirection.js /usr/local/bin/test-redirection
 
 COPY ./docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 RUN chmod +x /usr/local/bin/docker-entrypoint
