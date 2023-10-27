@@ -15,11 +15,6 @@ const CLI_NAME = 'test-redirection';
 
 const cli = cac(PKG_NAME);
 
-/**
- * @todo add options:
- * - batch length
- * - wait between requests
- */
 cli
 	.command('<configPath>', 'Test redirections.')
 	.option(
