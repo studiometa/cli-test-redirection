@@ -25,6 +25,24 @@ test-redirection redirects.csv
 
 The `redirects.csv` file should have 2 columns: the first one is the original URL, the second is the redirected URL.
 
+### Mock hosts to test redirects before deploying
+
+The Docker image can configure an Apache environment to test request against a mocked environment. 
+
+```sh
+# Create your .htaccess file with redirections to test
+vim .htaccess
+
+# Create a CSV fiels containing from,to URLS
+vim redirects.csv
+
+# Configure the temporary hosts referenced in your redirects, they will be configured in the Docker container
+export DOMAINS='fqdn.com,www.fqdn.com'
+
+# Run the Docker image by linking the current directy to /app
+docker run -it --rm -v $PWD:/app -e DOMAINS studiometa/cli-test-redirection redirects.csv 
+```
+
 ## Parameters
 
 ### `--concurrecy [number]`
