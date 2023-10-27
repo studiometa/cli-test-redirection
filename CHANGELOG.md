@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## v0.6.1 (2023-10-27)
+
+### Fixed
+
+- Fix Docker image name in GitHub Action ([79416e0](https://github.com/studiometa/cli-test-redirection/commit/79416e0))
+
 ## v0.6.0 (2023-10-27)
 
 ### Added
