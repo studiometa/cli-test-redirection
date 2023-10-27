@@ -4,35 +4,26 @@
 
 ## Usage
 
-You can directly use the CLI with `npx`:
+You can directly use the CLI with `docker`:
 
 ```sh
-npx @studiometa/cli-test-redirection path/to/config.json
+docker run -it --rm -v $PWD:/app studiometa/test-redirection redirects.csv 
 ```
 
-Your `config.json` file sould contain an array of objects with both `from` and `to` properties describing the origin and the target to test. For example:
-
-```json
-[
-  {
-    "from": "http://fqdn.com",
-    "to": "https://www.fqdn.com",
-    "ignoreQueryParameters": false,
-    "method": "GET"
-  }
-]
-```
-
-The `ignoreQueryParameters` property allow to ignore query parameters in the final URL before comparing it with the `to` URL as some redirection directives will keep them.
-
-When working with simple "from → to" redirections, you can use a CSV file. The first column should be the "from" URL, the second the "to" URL. You can then use the `--parser csv` paramete:
+Or with `npx`:
 
 ```sh
-npx @studiometa/cli-test-redirection path/to/redirects.csv --parser csv
-
-# With a custom delimiter
-npx @studiometa/cli-test-redirection path/to/redirects.csv --parser csv --csv-delimiter ';'
+npx @studiometa/cli-test-redirection redirects.csv
 ```
+
+Or you can install it globally:
+
+```sh
+npm install -g @studiometa/cli-test-redirection
+test-redirection redirects.csv
+```
+
+The `redirects.csv` file should have 2 columns: the first one is the original URL, the second is the redirected URL.
 
 ## Parameters
 
@@ -42,8 +33,8 @@ Limit the number of tests running concurrently.
 
 ```bash
 # Limit to 1 test
-test-redirection --concurrency 1 path/to/config.json
-test-redirection -c 1 path/to/config.json
+test-redirection --concurrency 1 path/to/redirects.csv
+test-redirection -c 1 path/to/redirects.csv
 ```
 
 ### `--delay [number]`
@@ -52,12 +43,12 @@ Add a delay in milliseconds between batch of tests.
 
 ```bash
 # Wait for 1s between each batch of tests
-test-redirection --delay 1000 path/to/config.json
-test-redirection -d 1000 path/to/config.json
+test-redirection --delay 1000 path/to/redirects.csv
+test-redirection -d 1000 path/to/redirects.csv
 
 # Wait for 1s between each tests
-test-redirection --delay 1000 --concurrency 1 path/to/config.json
-test-redirection -d 1000 -c 1 path/to/config.json
+test-redirection --delay 1000 --concurrency 1 path/to/redirects.csv
+test-redirection -d 1000 -c 1 path/to/redirects.csv
 ```
 
 ### `--ignore-query-parameters`
@@ -67,9 +58,10 @@ Ignore query parameters when comparing the final URL with the target URL defined
 ```bash
 test-redirection --ignore-query-parameters path/to/config.json
 ```
+
 ### `--parser [json|csv]`
 
-Define how the input file should be parsed.
+Define how the input file should be parsed. The parser is inferred by the given file extension.
 
 ```bash
 test-redirection path/to/file.csv --parser csv
@@ -101,16 +93,8 @@ test-redirection path/to/config.json -v --only-errors
 
 ### `--user`
 
-Define basic auth user. Must be used with the `--password` parameter.
+Define basic auth user. This parameter is directly passed to the underlying `curl` command.
 
 ```bash
-test-redirection path/to/config.json --user user --password pass
-```
-
-### `--password`
-
-Define basic auth password. Must be used with the `--user` parameter.
-
-```bash
-test-redirection path/to/config.json --password pass --user user
+test-redirection path/to/config.json --user user:password
 ```

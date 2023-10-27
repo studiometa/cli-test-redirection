@@ -37,8 +37,7 @@ cli
 	.option('--replace-to-host <host>', 'Replace host for the `to` parameter.')
 	.option('-v, --verbose', 'Log all redirections.')
 	.option('--only-errors', 'Log only errors.')
-	.option('--user <user>', 'Basic auth user.')
-	.option('--password <password>', 'Basic auth password.')
+	.option('-u, --user <user:password>', 'Basic auth user and password.')
 	.action((configPath, options) => {
 		const resolvedConfigPath = resolve(process.cwd(), configPath);
 

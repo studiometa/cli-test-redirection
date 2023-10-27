@@ -15,7 +15,6 @@ const OPTIONS = {
 	verbose: false,
 	onlyErrors: false,
 	user: '',
-	password: '',
 };
 
 const DIFF_OPTIONS = {
@@ -36,8 +35,8 @@ async function getFinalRedirect(url, method = 'GET') {
 	return new Promise((resolve, reject) => {
 		let cmd = `curl -o /dev/null -sL -k -w "%{url_effective}" -X ${method} -I "${url}"`;
 
-		if (OPTIONS.user && OPTIONS.password) {
-			cmd += ` --user ${OPTIONS.user}:${OPTIONS.password}`;
+		if (OPTIONS.user) {
+			cmd += ` --user ${OPTIONS.user}`;
 		}
 
 		exec(cmd, (error, out) => {
