@@ -8,11 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Add a Docker image for advanced usage with host mocking ([#3](https://github.com/studiometa/cli-test-redirection/pull/3))
 - Add `--replace-(from|to)-host` flags ([d738fc1](https://github.com/studiometa/cli-test-redirection/commit/d738fc1))
 
 ### Changed
 
 - Improve logging ([3bbbc1e](https://github.com/studiometa/cli-test-redirection/commit/3bbbc1e))
+- ⚠️ Bump Node version to >=20 ([#3](https://github.com/studiometa/cli-test-redirection/pull/3))
+
+### Deleted
+
+- ⚠️ Remove the `--password` parameter in favor of a single `--user user:pass` parameter ([#3](https://github.com/studiometa/cli-test-redirection/pull/3))
 
 ### Fixed
 
