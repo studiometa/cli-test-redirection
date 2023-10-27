@@ -15,7 +15,6 @@ const OPTIONS = {
 	verbose: false,
 	onlyErrors: false,
 	user: '',
-	password: '',
 };
 
 const DIFF_OPTIONS = {
@@ -36,8 +35,8 @@ async function getFinalRedirect(url, method = 'GET') {
 	return new Promise((resolve, reject) => {
 		let cmd = `curl -o /dev/null -sL -k -w "%{url_effective}" -X ${method} -I "${url}"`;
 
-		if (OPTIONS.user && OPTIONS.password) {
-			cmd += ` --user ${OPTIONS.user}:${OPTIONS.password}`;
+		if (OPTIONS.user) {
+			cmd += ` --user ${OPTIONS.user}`;
 		}
 
 		exec(cmd, (error, out) => {
@@ -125,6 +124,10 @@ async function redirectionTest({ options, total }) {
 		}
 	}
 
+	if (from.includes('/.*')) {
+		from = from.replace('/.*', '/__CLI_TEST_REDIRECTION__');
+	}
+
 	return new Promise(async (resolve, reject) => {
 		let out;
 
@@ -161,9 +164,9 @@ async function redirectionTest({ options, total }) {
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out });
 		} else if (out !== to) {
-			const msg = `🚫 ${chalk.white(from)} \n  → ${chalk.red.strikethrough(
+			const msg = `🚫 ${chalk.white(from)} \n  → ${chalk.red('-')} ${chalk.red.strikethrough(
 				to
-			)} \n  → ${chalk.magentaBright(out)}`;
+			)} \n  → ${chalk.magentaBright(`+ ${out}`)}`;
 			const diff = diffStringsUnified(to, out, DIFF_OPTIONS);
 
 			if (!OPTIONS.verbose) {
