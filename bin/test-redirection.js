@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from 'fs';
-import { resolve } from 'path';
+import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
 import chalk from 'chalk';
 import { cac } from 'cac';
 import run from '../src/index.js';
 import { importJson, importCsv } from '../src/utils.js';
-import pkg from '../package.json';
 
-// const pkg = importJson('../package.json', import.meta.url);
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json', import.meta.url);
 const PKG_NAME = pkg.name;
 const PKG_VERSION = pkg.version;
 const CLI_NAME = 'test-redirection';
