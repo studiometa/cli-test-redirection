@@ -1,6 +1,6 @@
 {
   "name": "@studiometa/cli-test-redirection",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "publishConfig": {
     "access": "public"
   },
@@ -20,24 +20,16 @@
     "node": ">=20"
   },
   "dependencies": {
-    "cac": "^6.7.12",
-    "chalk": "^5.0.1",
-    "fastq": "^1.13.0",
-    "jest-diff": "^27.5.1",
-    "log-update": "^5.0.0"
+    "cac": "^6.7.14",
+    "chalk": "^5.3.0",
+    "fastq": "^1.15.0",
+    "jest-diff": "^29.7.0",
+    "log-update": "^5.0.1"
   },
   "scripts": {
-    "test": "node bin/test-redirection.js",
-    "build": "npm run build:clear && npm run build:esbuild && npm run build:pkg",
-    "build:clear": "rm -rf dist",
-    "build:esbuild": "npm run build:esbuild:cjs && npm run build:esbuild:esm",
-    "build:esbuild:cjs": "esbuild bin/test-redirection.js --bundle --platform=node --format=cjs --outfile=dist/test-redirection.cjs",
-    "build:esbuild:esm": "esbuild bin/test-redirection.js --bundle --external:cac --external:chalk --external:fastq --external:jest-diff --external:log-update --platform=node --format=esm --outfile=dist/test-redirection.js",
-    "build:pkg": "pkg ./dist/test-redirection.cjs --out-path=./dist -t latest-alpine --compress Brotli"
+    "test": "node bin/test-redirection.js"
   },
   "devDependencies": {
-    "@types/node": "^17.0.23",
-    "esbuild": "^0.15.15",
-    "pkg": "^5.8.0"
+    "@types/node": "^18.18.7"
   }
 }
