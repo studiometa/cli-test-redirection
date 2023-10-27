@@ -1,6 +1,6 @@
 {
   "name": "@studiometa/cli-test-redirection",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "publishConfig": {
     "access": "public"
   },
