@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Add support for executing sh in the Docker container ([#6](https://github.com/studiometa/cli-test-redirection/pull/6))
+
+### Fixed
+
+- Fix Docker image build ([#6](https://github.com/studiometa/cli-test-redirection/pull/6))
+
+### Changed
+
+- ⚠️ Drop CJS support ([#6](https://github.com/studiometa/cli-test-redirection/pull/6))
+
 ## v0.6.1 (2023-10-27)
 
 ### Fixed
