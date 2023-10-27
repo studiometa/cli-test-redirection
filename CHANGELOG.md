@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## v0.7.2 (2023-10-27)
+
+### Fixed
+
+- Fix bin path ([bcc450b](https://github.com/studiometa/cli-test-redirection/commit/bcc450b))
+
 ## v0.7.1 (2023-10-27)
 
 ### Fixed
