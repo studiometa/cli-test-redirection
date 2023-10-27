@@ -90,4 +90,9 @@ then
     done
 fi
 
-test-redirection "$@"
+if [[ $1 == "sh" ]]
+then
+    sh
+else
+    test-redirection "$@"
+fi
