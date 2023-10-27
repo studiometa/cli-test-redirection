@@ -10,10 +10,11 @@ const OPTIONS = {
 	delay: 100,
 	ignoreQueryParameters: false,
 	replaceHost: '',
+	replaceFromHost: '',
+	replaceToHost: '',
 	verbose: false,
 	onlyErrors: false,
 	user: '',
-	password: '',
 };
 
 const DIFF_OPTIONS = {
@@ -34,8 +35,8 @@ async function getFinalRedirect(url, method = 'GET') {
 	return new Promise((resolve, reject) => {
 		let cmd = `curl -o /dev/null -sL -k -w "%{url_effective}" -X ${method} -I "${url}"`;
 
-		if (OPTIONS.user && OPTIONS.password) {
-			cmd += ` --user ${OPTIONS.user}:${OPTIONS.password}`;
+		if (OPTIONS.user) {
+			cmd += ` --user ${OPTIONS.user}`;
 		}
 
 		exec(cmd, (error, out) => {
@@ -54,7 +55,7 @@ async function getFinalRedirect(url, method = 'GET') {
 				}
 				reject({ error, url, method, cmd, out });
 			}
-			resolve(out);
+			resolve(decodeURI(out));
 		});
 	});
 }
@@ -84,7 +85,6 @@ async function getFinalRedirect(url, method = 'GET') {
  * @property {string} [diff] The diff if the test has failed.
  */
 
-
 function print(msg, type = 'success') {
 	logUpdate(msg);
 	if (type === 'error') {
@@ -110,13 +110,22 @@ let current = 0;
 async function redirectionTest({ options, total }) {
 	let { from, to } = options;
 
-	if (OPTIONS.replaceHost) {
-		from = new URL(from);
-		from.host = OPTIONS.replaceHost;
-		from = from.toString();
-		to = new URL(to);
-		to.host = OPTIONS.replaceHost;
-		to = to.toString();
+	if (OPTIONS.replaceHost || OPTIONS.replaceFromHost || OPTIONS.replaceToHost) {
+		if (OPTIONS.replaceHost || OPTIONS.replaceFromHost) {
+			from = new URL(from);
+			from.host = OPTIONS.replaceFromHost || OPTIONS.replaceHost;
+			from = from.toString();
+		}
+
+		if (OPTIONS.replaceHost || OPTIONS.replaceToHost) {
+			to = new URL(to);
+			to.host = OPTIONS.replaceToHost || OPTIONS.replaceHost;
+			to = to.toString();
+		}
+	}
+
+	if (from.includes('/.*')) {
+		from = from.replace('/.*', '/__CLI_TEST_REDIRECTION__');
 	}
 
 	return new Promise(async (resolve, reject) => {
@@ -137,47 +146,44 @@ async function redirectionTest({ options, total }) {
 		const delayingFn = typeof OPTIONS.delay === 'number' ? wait : () => {};
 
 		current++;
-		let count = chalk.gray(`[${current
-			.toString()
-			.padStart(total.toString().length)}/${total}]`);
+		let count = chalk.gray(
+			`[${current.toString().padStart(total.toString().length)}/${total}]`
+		);
 
 		if (typeof out !== 'string') {
-			const msg = `🔁 ${chalk.white(from)} → ${chalk.magenta(
+			const msg = `🔁 ${chalk.white(from)} \n  → ${chalk.magenta(
 				to
-			)} → ${chalk.magentaBright(out.out)} (potential infinite loop)`
-
+			)} \n  → ${chalk.magentaBright(out.out)} (potential infinite loop)`;
 
 			if (!OPTIONS.verbose) {
-  			printError(count + ' ' + msg);
+				printError(count + ' ' + msg);
 			} else {
-  			console.log(count, msg)
+				console.log(count, msg);
 			}
 
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out });
-
 		} else if (out !== to) {
-			const msg = `🚫 ${chalk.white(from)} → ${chalk.red.strikethrough(
+			const msg = `🚫 ${chalk.white(from)} \n  → ${chalk.red('-')} ${chalk.red.strikethrough(
 				to
-			)} → ${chalk.magentaBright(out)}`;
+			)} \n  → ${chalk.magentaBright(`+ ${out}`)}`;
 			const diff = diffStringsUnified(to, out, DIFF_OPTIONS);
 
 			if (!OPTIONS.verbose) {
-  			printError(count + ' ' + msg);  // write text
+				printError(count + ' ' + msg); // write text
 			} else {
-  			console.log(count, msg)
+				console.log(count, msg);
 			}
 
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out, diff });
 		} else {
-			const msg = `✅ ${chalk.white(from)} ${chalk.black('→')} ${chalk.blue(
+			const msg = `✅ ${chalk.white(from)} \n  ${chalk.black('→')} ${chalk.blue(
 				to
 			)}`;
 
-
 			if (!OPTIONS.verbose) {
-  			printSuccess(count + ' ' + msg);
+				printSuccess(count + ' ' + msg);
 			} else {
 				if (!OPTIONS.onlyErrors) {
 					console.log(count, msg);
@@ -219,11 +225,15 @@ export default function run(config, options = {}) {
 		if (totalRejected > 0) {
 			if (totalRejected !== total) {
 				console.log(
-					chalk.green(`🟢 ${total - totalRejected} out of ${total} test passed.`)
+					chalk.green(
+						`🟢 ${total - totalRejected} out of ${total} test passed.`
+					)
 				);
 			}
 
-			console.log(chalk.red(`🔴 ${totalRejected} out of ${total} tests failed.`));
+			console.log(
+				chalk.red(`🔴 ${totalRejected} out of ${total} tests failed.`)
+			);
 			console.log('');
 
 			// rejected.forEach(({ reason }) => {
