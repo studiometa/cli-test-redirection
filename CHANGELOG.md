@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## v0.7.0 (2023-10-27)
+
 ### Added
 
 - Add support for executing sh in the Docker container ([#6](https://github.com/studiometa/cli-test-redirection/pull/6))
