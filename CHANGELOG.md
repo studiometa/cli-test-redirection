@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## v0.7.5 (2023-12-20)
+
+### Fixed
+
+- Fix Docker image publication ([ff6db49](https://github.com/studiometa/cli-test-redirection/commit/ff6db49))
+
 ## v0.7.4 (2023-12-20)
 
 ### Fixed
