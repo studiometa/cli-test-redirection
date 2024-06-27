@@ -33,29 +33,35 @@ const DIFF_OPTIONS = {
  */
 async function getFinalRedirect(url, method = 'GET') {
 	return new Promise((resolve, reject) => {
-		let cmd = `curl -o /dev/null -sL -k -w "%{url_effective}" -X ${method} -I "${url}"`;
+		let cmd = `curl --output /dev/null --silent --show-error --fail --location --write-out '{"data":%{json},"headers":%{header_json}}' --user-agent 'studiometa/cli-test-redirection bot' --request ${method} "${url}"`;
 
 		if (OPTIONS.user) {
 			cmd += ` --user ${OPTIONS.user}`;
 		}
 
-		exec(cmd, (error, out) => {
+		exec(cmd, (error, stdout) => {
+			const out = JSON.parse(stdout);
 			if (error) {
 				if (OPTIONS.verbose) {
+					console.log(chalk.red('[ERROR]', chalk.underline(url)));
+					console.log(chalk.red('[ERROR]', out.data.errormsg));
+					if (out.data.http_code >= 500) {
+						console.log(
+							chalk.red(
+								`[ERROR] The error probably comes from a syntax error in your .htaccess file.`
+							)
+						);
+					}
 					console.log(
 						chalk.red(
-							'An error occured while doing a request. This might be caused by an infinite redirection loop.'
+							'[ERROR] Try running the following command to confirm the error:\n'
 						)
 					);
-					console.log(
-						chalk.red('Try running the following command to confirm this:\n')
-					);
 					console.log(chalk.red(`\tcurl -sIL -X ${method} "${url}"\n`));
-					console.log(chalk.red(error.message));
 				}
 				reject({ error, url, method, cmd, out });
 			}
-			resolve(decodeURI(out));
+			resolve(out);
 		});
 	});
 }
@@ -129,12 +135,13 @@ async function redirectionTest({ options, total }) {
 	}
 
 	return new Promise(async (resolve, reject) => {
-		let out;
+		let out, error, url;
 
 		try {
 			out = await getFinalRedirect(from, options.method);
-		} catch (error) {
-			out = error;
+			url = out.data.url_effective;
+		} catch (err) {
+			error = err;
 		}
 
 		if (OPTIONS.ignoreQueryParameters || options.ignoreQueryParameters) {
@@ -150,10 +157,12 @@ async function redirectionTest({ options, total }) {
 			`[${current.toString().padStart(total.toString().length)}/${total}]`
 		);
 
-		if (typeof out !== 'string') {
-			const msg = `🔁 ${chalk.white(from)} \n  → ${chalk.magenta(
+		if (error) {
+			const msg = `❌ ${chalk.white(from)} \n  → ${chalk.red('-')} ${chalk.red.strikethrough(
 				to
-			)} \n  → ${chalk.magentaBright(out.out)} (potential infinite loop)`;
+			)} \n  → ${chalk.magentaBright('+ ' + error.out.data.url)} (${
+				error.out.data.errormsg
+			})`;
 
 			if (!OPTIONS.verbose) {
 				printError(count + ' ' + msg);
@@ -163,11 +172,13 @@ async function redirectionTest({ options, total }) {
 
 			await delayingFn(OPTIONS.delay);
 			reject({ msg, from, to, out });
-		} else if (out !== to) {
-			const msg = `🚫 ${chalk.white(from)} \n  → ${chalk.red('-')} ${chalk.red.strikethrough(
-				to
-			)} \n  → ${chalk.magentaBright(`+ ${out}`)}`;
-			const diff = diffStringsUnified(to, out, DIFF_OPTIONS);
+		} else if (url !== to) {
+			const msg = `🚫 ${chalk.white(from)} \n  → ${chalk.red(
+				'-'
+			)} ${chalk.red.strikethrough(to)} \n  → ${chalk.magentaBright(
+				`+ ${url}`
+			)}`;
+			const diff = diffStringsUnified(to, url, DIFF_OPTIONS);
 
 			if (!OPTIONS.verbose) {
 				printError(count + ' ' + msg); // write text
@@ -176,7 +187,7 @@ async function redirectionTest({ options, total }) {
 			}
 
 			await delayingFn(OPTIONS.delay);
-			reject({ msg, from, to, out, diff });
+			reject({ msg, from, to, url, diff });
 		} else {
 			const msg = `✅ ${chalk.white(from)} \n  ${chalk.black('→')} ${chalk.blue(
 				to
@@ -191,7 +202,7 @@ async function redirectionTest({ options, total }) {
 			}
 
 			await delayingFn(OPTIONS.delay);
-			resolve({ msg, from, to, out });
+			resolve({ msg, from, to, url });
 		}
 	});
 }
