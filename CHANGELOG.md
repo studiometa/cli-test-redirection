@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## v0.7.5 (2024-06-27)
+
+### Changed
+
+- Display the original error message when a request fails ([#14](https://github.com/studiometa/cli-test-redirection/pull/14), [f087a63](https://github.com/studiometa/cli-test-redirection/commit/f087a63))
+
 ## v0.7.5 (2023-12-20)
 
 ### Fixed
